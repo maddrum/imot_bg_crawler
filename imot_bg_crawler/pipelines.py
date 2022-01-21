@@ -27,6 +27,12 @@ class ImotBgCrawlerPipeline:
         folder_name = f'{slugify(item[item_id]["address"].split(",")[-1].strip())}_{item_id}'
         return folder_name
 
+    def get_common_images_folder(self):
+        common_folder = os.path.join(self.output_path, 'all_pictures')
+        if not os.path.isdir(common_folder):
+            os.makedirs(common_folder)
+        return common_folder
+
     def check_existing(self, item):
         folder_name = self.get_item_dir_name(item)
         absolute_folder = os.path.join(self.output_path, folder_name)
@@ -63,11 +69,16 @@ class ImotBgCrawlerPipeline:
         for counter, image_url in enumerate(images):
             r = requests.get(image_url, stream=True)
             if r.status_code == 200:
+                # write to item folder
                 filepath = os.path.join(image_dir, f'image_{counter}.png')
+                common_filepath = os.path.join(self.get_common_images_folder(), f'{ad_id}_image_{counter}.png')
                 with open(filepath, 'wb') as f:
                     r.raw.decode_content = True
-                    shutil.copyfileobj(r.raw, f)
+                    raw_req = r.raw
+                    shutil.copyfileobj(raw_req, f)
                     f.close()
+                # write to common folder as wel
+                shutil.copy(filepath, common_filepath)
 
     def open_spider(self, spider):
         filename = self.get_all_results_file()
