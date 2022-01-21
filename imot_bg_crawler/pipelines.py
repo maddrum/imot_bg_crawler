@@ -4,9 +4,9 @@ import os
 import shutil
 
 import requests
-
 from scrapy.exceptions import DropItem
 from slugify import slugify
+
 from .settings import PER_ITEM_DOWNLOAD_IMAGES, PER_ITEM_RESULT, SKIP_EXISTING
 
 
@@ -21,6 +21,17 @@ class ImotBgCrawlerPipeline:
     def get_filename(prefix='result_'):
         return f'{prefix}{datetime.datetime.now().strftime("%d-%m-%Y@%H:%M")}.json'
 
+    @staticmethod
+    def get_item_dir_name(item):
+        item_id = list(item)[0]
+        folder_name = f'{slugify(item[item_id]["address"].split(",")[-1].strip())}_{item_id}'
+        return folder_name
+
+    def check_existing(self, item):
+        folder_name = self.get_item_dir_name(item)
+        absolute_folder = os.path.join(self.output_path, folder_name)
+        return os.path.isdir(absolute_folder)
+
     def get_all_results_file(self):
         file_path = os.path.dirname(__file__)
         filename = self.get_filename()
@@ -28,16 +39,15 @@ class ImotBgCrawlerPipeline:
         return os.path.join(self.output_path, filename)
 
     def get_create_item_dir(self, item):
-        id = list(item)[0]
-        folder_name = f'{slugify(item[id]["address"].split(",")[-1].strip())}_{id}'
+        folder_name = self.get_item_dir_name(item)
         filepath = os.path.join(self.output_path, folder_name)
         if not os.path.isdir(filepath):
             os.makedirs(filepath)
         return filepath
 
     def write_item_result_file(self, item):
-        id = list(item)[0]
-        filename = self.get_filename(prefix=f'ad-id_{id}_result_')
+        item_id = list(item)[0]
+        filename = self.get_filename(prefix=f'ad-id_{item_id}_result_')
         filepath = self.get_create_item_dir(item)
         absolute_filename = os.path.join(filepath, filename)
         with open(absolute_filename, 'w') as file:
@@ -58,11 +68,6 @@ class ImotBgCrawlerPipeline:
                     r.raw.decode_content = True
                     shutil.copyfileobj(r.raw, f)
                     f.close()
-
-    def check_existing(self, item):
-        id = list(item)[0]
-        filepath = os.path.join(self.output_path, id)
-        return os.path.isdir(filepath)
 
     def open_spider(self, spider):
         filename = self.get_all_results_file()
