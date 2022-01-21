@@ -15,7 +15,10 @@ class ImotBgSpider(scrapy.Spider):
 
     @staticmethod
     def get_text(text):
-        soup = BeautifulSoup(text)
+        try:
+            soup = BeautifulSoup(text)
+        except (TypeError, AttributeError):
+            return ''
         return soup.get_text()
 
     def parse(self, response, **kwargs):
@@ -47,6 +50,8 @@ class ImotBgSpider(scrapy.Spider):
         descr_base = self.get_text(descr_base).strip()
         descr_extra = response.css('#dots_less').get()
         descr_extra = self.get_text(descr_extra).strip()
+        address = response.css('span[style*="font-size:14px; margin:8px 0; display:inline-block"]').get()
+        address = self.get_text(address)
         descr = descr_base + descr_extra
         descr.replace('Виж повече', '')
         descr.replace('Виж по-малко', '')
@@ -57,6 +62,7 @@ class ImotBgSpider(scrapy.Spider):
             ad_id: {
                 'url': url,
                 'description': descr,
+                'address': address,
                 'metadata': metadata,
                 'price': price,
                 'images': images,
