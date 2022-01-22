@@ -18,13 +18,16 @@ class ImotBgCrawlerPipeline:
     existing_items = []
 
     @staticmethod
-    def get_filename(prefix='result_'):
-        return f'{prefix}{datetime.datetime.now().strftime("%d-%m-%Y@%H:%M")}.json'
+    def get_filename(prefix='result_', suffix=None):
+        return f'{prefix}{datetime.datetime.now().strftime("%d-%m-%Y@%H:%M")}' \
+               f'{"_" + suffix if suffix is not None else ""}.json'
 
     @staticmethod
     def get_item_dir_name(item):
         item_id = list(item)[0]
-        folder_name = f'{slugify(item[item_id]["address"].split(",")[-1].strip())}_{item_id}'
+        folder_name = f'{slugify(item[item_id]["source"])}_' \
+                      f'{slugify(item[item_id]["address"].split(",")[-1].strip())}_' \
+                      f'{item_id}'
         return folder_name
 
     def get_common_images_folder(self):
@@ -38,9 +41,10 @@ class ImotBgCrawlerPipeline:
         absolute_folder = os.path.join(self.output_path, folder_name)
         return os.path.isdir(absolute_folder)
 
-    def get_all_results_file(self):
+    def get_all_results_file(self, spider_source):
         file_path = os.path.dirname(__file__)
-        filename = self.get_filename()
+        prefix = slugify(spider_source) + '_'
+        filename = self.get_filename(prefix=prefix)
         self.output_path = os.path.join(file_path, 'output_files')
         return os.path.join(self.output_path, filename)
 
@@ -53,7 +57,7 @@ class ImotBgCrawlerPipeline:
 
     def write_item_result_file(self, item):
         item_id = list(item)[0]
-        filename = self.get_filename(prefix=f'ad-id_{item_id}_result_')
+        filename = self.get_filename(prefix=f'ad-id_{item_id}_')
         filepath = self.get_create_item_dir(item)
         absolute_filename = os.path.join(filepath, filename)
         with open(absolute_filename, 'w') as file:
@@ -71,7 +75,9 @@ class ImotBgCrawlerPipeline:
             if r.status_code == 200:
                 # write to item folder
                 filepath = os.path.join(image_dir, f'image_{counter}.png')
-                common_filepath = os.path.join(self.get_common_images_folder(), f'{ad_id}_image_{counter}.png')
+                common_filepath = os.path.join(
+                    self.get_common_images_folder(),
+                    f'{item[ad_id]["source"]}_{ad_id}_image_{counter}.png')
                 with open(filepath, 'wb') as f:
                     r.raw.decode_content = True
                     raw_req = r.raw
@@ -81,7 +87,8 @@ class ImotBgCrawlerPipeline:
                 shutil.copy(filepath, common_filepath)
 
     def open_spider(self, spider):
-        filename = self.get_all_results_file()
+        spider_source = spider.allowed_domains[0]
+        filename = self.get_all_results_file(spider_source=spider_source)
         self.results_file = open(filename, 'a')
         self.start_time = datetime.datetime.now()
 

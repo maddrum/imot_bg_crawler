@@ -3,23 +3,19 @@ import re
 from urllib.parse import parse_qs, urlparse
 
 import scrapy
-from bs4 import BeautifulSoup
+from scrapy.utils.project import get_project_settings
 
-from imot_bg_crawler.input_files.imot_bg_spider import URLS
+from imot_bg_crawler.utils.tools import get_html_tag_text
 
 
 class ImotBgSpider(scrapy.Spider):
     name = 'imot.bg'
     allowed_domains = ['imot.bg']
-    start_urls = URLS
 
-    @staticmethod
-    def get_text(text):
-        try:
-            soup = BeautifulSoup(text)
-        except (TypeError, AttributeError):
-            return ''
-        return soup.get_text()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        settings = get_project_settings()
+        self.start_urls = settings['INPUT_DATA'][self.allowed_domains[0]]
 
     def parse(self, response, **kwargs):
         items = response.css('.lnk2')
@@ -39,19 +35,19 @@ class ImotBgSpider(scrapy.Spider):
         index = 0
         for item in metadata_raw:
             if index % 2 == 0:
-                metadata[self.get_text(item)] = ''
+                metadata[get_html_tag_text(item)] = ''
             else:
-                metadata[self.get_text(metadata_raw[index - 1])] = self.get_text(item)
+                metadata[get_html_tag_text(metadata_raw[index - 1])] = get_html_tag_text(item)
             index += 1
 
         price = response.css('#cena').get()
-        price = self.get_text(price).strip()
+        price = get_html_tag_text(price).strip()
         descr_base = response.css('#description_div').get()
-        descr_base = self.get_text(descr_base).strip()
+        descr_base = get_html_tag_text(descr_base).strip()
         descr_extra = response.css('#dots_less').get()
-        descr_extra = self.get_text(descr_extra).strip()
+        descr_extra = get_html_tag_text(descr_extra).strip()
         address = response.css('span[style*="font-size:14px; margin:8px 0; display:inline-block"]').get()
-        address = self.get_text(address)
+        address = get_html_tag_text(address)
         descr = descr_base + descr_extra
         descr.replace('Виж повече', '')
         descr.replace('Виж по-малко', '')
@@ -67,6 +63,7 @@ class ImotBgSpider(scrapy.Spider):
                 'price': price,
                 'images': images,
                 'added': datetime.datetime.now().isoformat(),
+                'source': self.allowed_domains[0],
             }
         }
 
