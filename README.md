@@ -1,15 +1,23 @@
-To use:
+# To use
 
 1. Create virtual environment for the project using Python 3.8+
 2. Install requirements with `pip install -r requirements.txt`
-3. Update search `URLS` in file `./input_files/imot_bg_spider.py`
-   `URLS` are obtained by visiting imot.bg and perform a search with your criteria. 
-   Could have as many searches as you wish.
-4. Run spider with `scrapy crawl imot.bg`. If you do not want logs run with `scrapy crawl imot.bg --nolog`
+3. Update search URLs in file `./input_files/input.yaml`
+   When done, check with `http://www.yamllint.com/` if the input file is okay.
+4. Run spider for the desired website. If you do not want logs add `--nolog` in the end of the command
 5. When finished, check the `./imot_bg_crawler/output_files` folder for the results.
 6. Enjoy.
 
-Settings
+---
+
+# Spiders
+
+1. Imot.bg - `scrapy crawl imot.bg`
+2. Imoti.com - `scrapy crawl imoti.com`'
+
+---
+
+# Settings
 
 `SKIP_EXISTING` - does not save data if already saved, default `True`
 

@@ -1,0 +1,10 @@
+# For imot.bg - go to their search page, apply criteria, do the search. Get the url and paste here
+imot.bg:
+  - https://www.imot.bg/pcgi/imot.cgi?act=3&slink=7ks0n9&f1=1
+  - https://www.imot.bg/pcgi/imot.cgi?act=3&slink=7l5xit&f1=1
+
+# For imoti.com - go to their search page at https://www.imoti.com/prodazhbi or https://www.imoti.com/naemi
+# Apply criteria. Get the url and paste here
+imoti.com:
+  - https://www.imoti.com/prodazhbi/grad-sofiya/gotse-delchev/tristaini
+  - https://www.imoti.com/prodazhbi/grad-sofiya/borovo/dvustaini
