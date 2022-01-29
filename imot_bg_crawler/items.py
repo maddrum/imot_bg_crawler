@@ -1,12 +1,17 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
-
-import scrapy
+from dataclasses import dataclass
 
 
-class ImotBgCrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+@dataclass
+class MetaData:
+    metadata: dict
+
+
+@dataclass
+class CommonData:
+    url: str
+    description: str
+    address: str
+    price: str
+    images: list
+    added: str
+    source: str

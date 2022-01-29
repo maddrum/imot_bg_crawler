@@ -12,7 +12,7 @@
 # Spiders
 
 1. Imot.bg - `scrapy crawl imot.bg`
-2. Imoti.com - `scrapy crawl imoti.com`'
+2. Imoti.com - `scrapy crawl imoti.com`
 
 
 # Settings
