@@ -1,4 +1,8 @@
+
+
 from bs4 import BeautifulSoup
+
+
 
 
 def get_html_tag_text(text):
@@ -7,3 +11,6 @@ def get_html_tag_text(text):
     except (TypeError, AttributeError):
         return ''
     return soup.get_text()
+
+
+

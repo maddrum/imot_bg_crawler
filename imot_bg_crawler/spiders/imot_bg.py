@@ -1,14 +1,13 @@
-import datetime
 import re
 from urllib.parse import parse_qs, urlparse
 
-import scrapy
 from scrapy.utils.project import get_project_settings
 
 from imot_bg_crawler.utils.tools import get_html_tag_text
+from imot_bg_crawler.spiders.base_spiders import BaseSpider
 
 
-class ImotBgSpider(scrapy.Spider):
+class ImotBgSpider(BaseSpider):
     name = 'imot.bg'
     allowed_domains = ['imot.bg']
 
@@ -54,17 +53,16 @@ class ImotBgSpider(scrapy.Spider):
         images = response.css('a::attr(data-link)').getall()
         images = [f'https:{item}' for item in images if re.search(r'/big/', item) is not None]
 
-        result = {
-            ad_id: {
-                'url': url,
-                'description': descr,
-                'address': address,
-                'metadata': metadata,
-                'price': price,
-                'images': images,
-                'added': datetime.datetime.now().isoformat(),
-                'source': self.allowed_domains[0],
-            }
-        }
+        self.fill_in_scraped_data(
+            ad_id=ad_id,
+            url=url,
+            descr=descr,
+            address=address,
+            price=price,
+            images=images,
+            source=self.allowed_domains[0],
+            metadata=metadata
+        )
 
+        result = self.generate_result()
         return result

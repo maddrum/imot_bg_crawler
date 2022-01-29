@@ -1,14 +1,13 @@
-import datetime
 import re
 from urllib.parse import urlparse
 
-import scrapy
 from scrapy.utils.project import get_project_settings
 
+from imot_bg_crawler.spiders.base_spiders import BaseSpider
 from imot_bg_crawler.utils.tools import get_html_tag_text
 
 
-class ImotiComSpider(scrapy.Spider):
+class ImotiComSpider(BaseSpider):
     name = 'imoti.com'
     allowed_domains = ['imoti.com']
 
@@ -54,17 +53,17 @@ class ImotiComSpider(scrapy.Spider):
             match = pattern.search(item)
             images.append(f'http:{match.group("src")}')
 
-        result = {
-            ad_id: {
-                'url': url,
-                'description': descr,
-                'address': address,
-                'metadata': metadata,
-                'price': price,
-                'images': images,
-                'added': datetime.datetime.now().isoformat(),
-                'source': self.allowed_domains[0],
-            }
-        }
+        self.fill_in_scraped_data(
+            ad_id=ad_id,
+            url=url,
+            descr=descr,
+            address=address,
+            price=price,
+            images=images,
+            source=self.allowed_domains[0],
+            metadata=metadata
+        )
+
+        result = self.generate_result()
 
         return result
