@@ -16,6 +16,8 @@ class ImotBgCrawlerPipeline:
     output_path = None
     result = []
     existing_items = []
+    items_folder = 'items'
+    results_folder = 'reports'
 
     @staticmethod
     def get_filename(prefix='result_', suffix=None):
@@ -25,13 +27,15 @@ class ImotBgCrawlerPipeline:
     @staticmethod
     def get_item_dir_name(item):
         item_id = list(item)[0]
-        folder_name = f'{slugify(item[item_id]["source"])}_' \
-                      f'{slugify(item[item_id]["address"].split(",")[-1].strip())}_' \
+        folder_name = f'{slugify(item[item_id]["address"].split(",")[-1].strip())}_' \
                       f'{item_id}'
-        return folder_name
+        folder_path = os.path.join(slugify(item[item_id]['source']), folder_name)
+        if not os.path.isdir(folder_path):
+            os.makedirs(folder_path)
+        return folder_path
 
     def get_common_images_folder(self):
-        common_folder = os.path.join(self.output_path, 'all_pictures')
+        common_folder = os.path.join(self.output_path, self.items_folder, 'all_pictures')
         if not os.path.isdir(common_folder):
             os.makedirs(common_folder)
         return common_folder
@@ -46,11 +50,14 @@ class ImotBgCrawlerPipeline:
         prefix = slugify(spider_source) + '_'
         filename = self.get_filename(prefix=prefix)
         self.output_path = os.path.join(file_path, 'output_files')
-        return os.path.join(self.output_path, filename)
+        results_folder = os.path.join(self.output_path, self.results_folder, slugify(spider_source))
+        if not os.path.isdir(results_folder):
+            os.makedirs(results_folder)
+        return os.path.join(results_folder, filename)
 
     def get_create_item_dir(self, item):
         folder_name = self.get_item_dir_name(item)
-        filepath = os.path.join(self.output_path, folder_name)
+        filepath = os.path.join(self.output_path, self.items_folder, folder_name)
         if not os.path.isdir(filepath):
             os.makedirs(filepath)
         return filepath
