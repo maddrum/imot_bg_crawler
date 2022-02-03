@@ -42,7 +42,7 @@ class ImotBgCrawlerPipeline:
 
     def check_existing(self, item):
         folder_name = self.get_item_dir_name(item)
-        absolute_folder = os.path.join(self.output_path, folder_name)
+        absolute_folder = os.path.join(self.output_path, self.items_folder, folder_name)
         return os.path.isdir(absolute_folder)
 
     def get_all_results_file(self, spider_source):
